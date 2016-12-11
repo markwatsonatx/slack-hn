@@ -55,7 +55,7 @@ function getCachedValue(host, token, name, callback) {
  * @param {string} token - serverlessup token
  * @param {string} name - name of the value to cache (name/value pair)
  * @param {Object} value - the value to cache
- * @param expire - expiration in minutes
+ * @param expire - expiration in seconds
  * @param {cacheValueCallback} callback - callback
  */
 function cacheValue(host, token, name, value, expire, callback) {

@@ -45,7 +45,7 @@ function getAndCacheTopStories(params, callback) {
                 sendTopStoriesToSlack(stories, params, callback);
             }
             else {
-                cacheValue(params.serverlessup_host, params.serverlessup_token, 'topstories', stories, (err, statusCode) => {
+                cacheValue(params.serverlessup_host, params.serverlessup_token, 'topstories', stories, 300, (err, statusCode) => {
                     if (err) {
                         console.log("Error saving stories to sup: " + err);
                     }
