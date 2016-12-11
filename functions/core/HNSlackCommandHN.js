@@ -1,10 +1,16 @@
-// $DefaultParam:serverlessup_host
-// $DefaultParam:serverlessup_token
-
+/**
+ * @param params
+ * @param params.command
+ * @param params.text
+ * @param params.response_url
+ * @param params.serverlessup_host
+ * @param params.serverlessup_token
+ * @param callback
+ */
 function run(params, callback) {
 	var command = decodeURIComponent(params.command);
 	if (command == "/hn") {
-		// mw:TODO: parse command for topstories, ask, etc
+		// TODO: parse params.text for topstories, ask, etc
 		getTopStories(params, callback);
 	}
 	else {

@@ -1,3 +1,6 @@
+Cloud Functions
+https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=YOUR_SLACK_CLIENT_ID&redirect_uri=YOUR_SLACK_AUTH_API_GATEWAY_URL_ENCODED
+
 Lambda
 https://slack.com/oauth/authorize?scope=incoming-webhook,commands&client_id=YOUR_SLACK_CLIENT_ID&redirect_uri=YOUR_SLACK_AUTH_API_GATEWAY_URL_ENCODED
 

@@ -1,8 +1,11 @@
 var config = require("./config.json");
 var aws = require('aws-sdk');
 
-exports.handler = (event, context, callback) => {
-    run(event, (err, response) => {
+exports.HNSlackCommand = (req, res) => {
+    var params = {
+		// TODO:
+	};
+	run(params, (err, response) => {
 		if (! err) {
 			var lambda = new aws.Lambda();
 			var lambdaParams = {
@@ -13,16 +16,16 @@ exports.handler = (event, context, callback) => {
 			lambda.invoke(lambdaParams, (error, data) => {
 				if (error) {
 					console.log("Error calling lambda function: " + error);
-  				  	callback(null, { "text": "Sorry, we are experiencing issues right now!" });
+  				  	res.status(200).send(JSON.stringify({ "text": "Sorry, we are experiencing issues right now!" }));
   				}
   				else {
-					console.log("Call to lambda function succeeded: " + data);
-  					callback(null, response);
+					console.log("Call to cloud function succeeded: " + data);
+                    res.status(200).send(JSON.stringify(response));
 				}
 			});
 		}
 		else {
-			callback(null, response);
+			res.status(500).send(JSON.stringify(err));
 		}
 	});
 };
