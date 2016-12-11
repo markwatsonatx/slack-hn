@@ -62,15 +62,9 @@ then
 else
 	echo '{}' > $func_json_file_name
 fi
-# zip up js and json
-#func_zip_file_name=$(echo $func_tmp_file_dir'/deployment.zip')
-#rm -rf $func_zip_file_name
-#zip -j $func_zip_file_name $func_tmp_file_name $func_json_file_name
-#func_json_rel_file_name=$(echo $func_json_file_name | sed 's/.*\///')
-#gcloud_cmd=$(echo $gcloud_cmd --zip-file fileb://$func_zip_file_name)
+# cd into func dir and run
 pushd $func_tmp_file_dir
 gcloud_cmd=$(echo gcloud alpha functions deploy $func_name --stage-bucket slack-hn-cloud-functions --trigger-http)
-# run
 echo $gcloud_cmd
 eval $gcloud_cmd
 popd
