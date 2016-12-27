@@ -1,12 +1,13 @@
 // $DefaultParam:serverlessup_host
 // $DefaultParam:serverlessup_token
+// $DefaultParam:openwhisk_namespace
 
 function main(params) {
     return new Promise((resolve, reject) => {
 		run(params, (err, response) => {
 			if (! err) {
 				var whiskActionParams = {
-					actionName: '/markwats@us.ibm.com_hn/HNSlackCommandHN',
+					actionName: params.openwhisk_namespace + '/HNSlackCommandHN',
 					params: params,
 					blocking: false
 				};
