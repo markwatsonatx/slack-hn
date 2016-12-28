@@ -66,7 +66,7 @@ x-ibm-configuration:
               title: "Convert to JSON"
               source: "apim.readInputAsBuffer(function(err,buffer) {\n   var text\
                 \ = buffer.toString('utf8');\n   var output = '{';\n   var reg = new\
-                \ RegExp(/(i^|\\?|\\&)([^=]+)\\=([^&]+)/g);\n   var result;\n   var\
+                \ RegExp(/(^|\\?|\\&)([^=]+)\\=([^&]+)/g);\n   var result;\n   var\
                 \ first = true;\n   while((result = reg.exec(text)) !== null) {\n\
                 \      if (first) {\n         first = false;\n      }\n      else\
                 \ {\n         output = output + ',';\n      }\n      output = output\
@@ -97,9 +97,59 @@ x-ibm-configuration:
                 from: ".response.result.text"
               - set: ".attachments"
                 from: ".response.result.attachments"
+              - set: ".delete_original"
+                from: ".response.result.delete_original"
+              - set: ".replace_original"
+                from: ".response.result.replace_original"
+        - condition: "((request.verb==='POST')&&(api.operation.path==='/hn/message'))"
+          execute:
+          - gatewayscript:
+              title: "Convert to JSON"
+              source: "apim.readInputAsBuffer(function(err,buffer) {\n   var text\
+                \ = buffer.toString('utf8');\n   var output = '{';\n   var reg = new\
+                \ RegExp(/(^|\\?|\\&)([^=]+)\\=([^&]+)/g);\n   var result;\n   var\
+                \ first = true;\n   while((result = reg.exec(text)) !== null) {\n\
+                \      if (first) {\n         first = false;\n      }\n      else\
+                \ {\n         output = output + ',';\n      }\n      output = output\
+                \ + ' \"' + result[2] + '\": \"' + result[3] + '\"';\n   }\n   output\
+                \ = output + ' }';\n   session.output.write(output);\n   apim.output('application/json');\n\
+                });"
+          - invoke:
+              target-url: "https://openwhisk.ng.bluemix.net/api/v1/namespaces/OPENWHISK_NAMESPACE/actions/HNSlackMessage?blocking=true"
+              title: "Call OpenWhisk"
+              verb: "POST"
+              username: "OPENWHISK_USERNAME"
+              password: "OPENWHISK_PASSWORD"
+              cache-response: "no-cache"
+          - map:
+              title: "Convert to Slack Response"
+              inputs:
+                ?
+                : schema:
+                    $ref: "#/definitions/OpenWhiskResponseBody"
+                  variable: "message.body"
+              outputs:
+                ?
+                : schema:
+                    $ref: "#/definitions/SlackResponse"
+                  variable: "message.body"
+              actions:
+              - set: ".text"
+                from: ".response.result.text"
+              - set: ".attachments"
+                from: ".response.result.attachments"
+              - set: ".delete_original"
+                from: ".response.result.delete_original"
+              - set: ".replace_original"
+                from: ".response.result.replace_original"
   phase: "realized"
   gateway: "datapower-gateway"
 paths:
+  /hn/message:
+    post:
+      responses:
+        200:
+          description: "200 OK"
   /hn/command:
     post:
       responses:
@@ -142,6 +192,10 @@ definitions:
     - "response"
   SlackResponse:
     properties:
+      delete_original:
+        type: "boolean"
+      replace_original:
+        type: "boolean"
       attachments:
         type: "object"
       text:
@@ -152,6 +206,10 @@ definitions:
     - "attachments"
   OpenWhiskResponseResult:
     properties:
+      delete_original:
+        type: "boolean"
+      replace_original:
+        type: "boolean"
       attachments:
         type: "object"
       text:
@@ -167,13 +225,6 @@ definitions:
     additionalProperties: false
     required:
     - "result"
-  OpenWhiskMessage:
-    properties:
-      command:
-        type: "string"
-    additionalProperties: false
-    required:
-    - "command"
 tags: []
 consumes:
 - "application/x-www-form-urlencoded"
