@@ -6,4 +6,4 @@ exports.handler = (event, context, callback) => {
 	run(event,callback);
 };
 
-{% include "../core/HNSlackCommandHN.js" %}
+{% include "../core/HNSlackCommandTopStories.js" %}

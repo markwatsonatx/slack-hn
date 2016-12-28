@@ -2,11 +2,14 @@ var config = require("./config.json");
 var aws = require('aws-sdk');
 
 exports.handler = (event, context, callback) => {
-    run(event, (err, response, action) => {
+    run(event, (err, response, payload) => {
 		if (! err) {
 			var functionName;
-            if (action == 'top') {
-                functionName = 'HNSlackCommandTopStories'
+            if (payload.actions[0].name == 'hn_topstories_more') {
+                functionName = 'HNSlackCommandTopStories';
+                event['command'] = '/hn';
+                event['startIndex'] = Number(payload.actions[0].value);
+                event['response_url'] = payload.response_url;
             }
 			var lambda = new aws.Lambda();
 			var lambdaParams = {
@@ -31,4 +34,4 @@ exports.handler = (event, context, callback) => {
 	});
 };
 
-{% include "../core/HNSlackCommand.js" %}
+{% include "../core/HNSlackMessage.js" %}

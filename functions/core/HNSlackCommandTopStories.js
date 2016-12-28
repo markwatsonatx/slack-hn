@@ -8,23 +8,16 @@
  * @param callback
  */
 function run(params, callback) {
-	var command = decodeURIComponent(params.command);
-	if (command == "/hn") {
-		// TODO: parse params.text for topstories, ask, etc
-		getTopStories(params, callback);
-	}
-	else {
-		var response = { "error": "Invalid command '" + command + "'" };
-		callback(null, response);
-	}
-}
-
-function getTopStories(params, callback) {
 	if (! params.serverlessup_host) {
         getAndCacheTopStories(params, callback);
 	}
 	else {
-		getCachedValue(params.serverlessup_host, params.serverlessup_token, 'topstories', (err, statusCode, value) => {
+        var startIndex = 0;
+        if (params.startIndex) {
+            startIndex = params.startIndex;
+        }
+        var cacheKey = 'top' + startIndex;
+		getCachedValue(params.serverlessup_host, params.serverlessup_token, cacheKey, (err, statusCode, value) => {
             if (err || ! value) {
                 getAndCacheTopStories(params, callback);
             }
@@ -36,7 +29,11 @@ function getTopStories(params, callback) {
 }
 
 function getAndCacheTopStories(params, callback) {
-	getHackerNewsTopStories(10, (err, stories) => {
+    var startIndex = 0;
+    if (params.startIndex) {
+        startIndex = params.startIndex;
+    }
+	getHackerNewsTopStories(startIndex, 10, (err, stories) => {
 		if (err) {
 			sendErrorToSlack("Sorry, we are having trouble connecting to Hacker News right now!", params, callback);
 		}
@@ -45,7 +42,8 @@ function getAndCacheTopStories(params, callback) {
                 sendTopStoriesToSlack(stories, params, callback);
             }
             else {
-                cacheValue(params.serverlessup_host, params.serverlessup_token, 'topstories', stories, 300, (err, statusCode) => {
+                var cacheKey = 'top' + startIndex;
+                cacheValue(params.serverlessup_host, params.serverlessup_token, cacheKey, stories, 300, (err, statusCode) => {
                     if (err) {
                         console.log("Error saving stories to sup: " + err);
                     }
@@ -57,10 +55,30 @@ function getAndCacheTopStories(params, callback) {
 }
 
 function sendTopStoriesToSlack(stories, params, callback) {
+    var startIndex = 0;
+    if (params.startIndex) {
+    	startIndex = params.startIndex;
+	}
+	var buttons =  {
+        text: '',
+        fallback: '',
+        callback_id: 'hn_topstories_more',
+        color: '#3AA3E3',
+		attachment_type: 'default',
+        actions: [{
+            name: 'hn_topstories_more',
+            text: 'Load More',
+            type: 'button',
+            value: startIndex + 10
+        }]
+    };
+    var attachments = stories.concat(buttons);
 	var slackCallbackUrl = decodeURIComponent(params.response_url)
 	var slackPost = {
-		text: "Here are the top Hacker News stories:",
-		attachments: stories
+        delete_original: false,
+        replace_original: false,
+        text: "",
+		attachments: attachments
 	};
 	console.log("Sending stories to Slack @ " + slackCallbackUrl);
 	postToSlack(slackCallbackUrl, slackPost, (err, statusCode) => {
@@ -93,18 +111,6 @@ function sendErrorToSlack(errorMessage, params, callback) {
 			callback(null, response);
 		}
 	});
-}
-
-function getNewStories(params) {
-	
-}
-
-function getAskHN(params) {
-
-}
-
-function getJobs(params) {
-	
 }
 
 {% include "../lib/HackerNewsAPI.js" %}

@@ -5,11 +5,15 @@ exports.HNSlackCommand = (req, res) => {
     var params = {
 		// TODO:
 	};
-	run(params, (err, response) => {
+	run(params, (err, response, action) => {
 		if (! err) {
+            var functionName;
+            if (action == 'top') {
+                functionName = 'HNSlackCommandTopStories'
+            }
 			var lambda = new aws.Lambda();
 			var lambdaParams = {
-  				FunctionName: 'HNSlackCommandHN',
+  				FunctionName: functionName,
   				Payload: JSON.stringify(event),
 				InvocationType: "Event"
 			};

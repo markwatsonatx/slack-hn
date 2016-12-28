@@ -1,6 +1,6 @@
-function getHackerNewsTopStories(count, callback) {
+function getHackerNewsTopStories(startIndex, count, callback) {
 	var topStoriesUrl = 'https://hacker-news.firebaseio.com/v0/topstories.json';
-	var req = require('https').get(topStoriesUrl, (res) => {
+	require('https').get(topStoriesUrl, (res) => {
 		var stories = [];
 		var storyIdsJson = '';
 		res.on('data', function (chunk) {
@@ -9,25 +9,34 @@ function getHackerNewsTopStories(count, callback) {
 		res.on('end', function () {
 			var storyIds = JSON.parse(storyIdsJson);
 			if (storyIds && storyIds.length > 0) {
-				var i = 0;
-				getStoryCallback = function(err, story) {
-					if (story) {
-						stories.push({
-							author_name: story.title,
-							author_link: story.url,
-							title: story.score + ' point(s) by ' + story.by + ' X comments',
-							title_link: 'https://news.ycombinator.com/item?id=' + story.id
-						});
-					}
-					i = i + 1;
-					if (i >= Math.min(count,storyIds.length)) {
-						callback(null, stories);
-					}
-					else {
-						getHackerNewsStory(storyIds[i], getStoryCallback);
-					}
-				};
-				getHackerNewsStory(storyIds[i], getStoryCallback);
+				var i = startIndex;
+                if (i >= Math.min((startIndex+count),storyIds.length)) {
+                    callback(null, stories);
+                }
+                else {
+                    getStoryCallback = function (err, story) {
+                        if (story) {
+                            var pointsStr = ' point';
+                            if (story.score != 1) {
+                                pointsStr += 's';
+                            }
+                            stories.push({
+                                title: story.title,
+                                title_link: story.url,
+                                author_name: story.score + pointsStr + ' by ' + story.by + ' | view comments',
+                                author_link: 'https://news.ycombinator.com/item?id=' + story.id
+                            });
+                        }
+                        i = i + 1;
+                        if (i >= Math.min((startIndex+count), storyIds.length)) {
+                            callback(null, stories);
+                        }
+                        else {
+                            getHackerNewsStory(storyIds[i], getStoryCallback);
+                        }
+                    };
+                    getHackerNewsStory(storyIds[i], getStoryCallback);
+                }
 			}
 		});
 	}).on('error', (e) => {
@@ -37,7 +46,7 @@ function getHackerNewsTopStories(count, callback) {
 
 function getHackerNewsStory(storyId, callback) {
 	var storyUrl = 'https://hacker-news.firebaseio.com/v0/item/' + storyId + '.json';
-	var req = require('https').get(storyUrl, (res) => {
+	require('https').get(storyUrl, (res) => {
 		var storyJson = '';
 		res.on('data', function (chunk) {
 			storyJson += chunk;

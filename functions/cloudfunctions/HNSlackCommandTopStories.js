@@ -1,6 +1,6 @@
 var config = require("./config.json");
 
-exports.HNSlackCommandHN = (req, res) => {
+exports.HNSlackCommandTopStories = (req, res) => {
     var formData = extractFormData(req);
 	var params = {
         command: formData['command'],
@@ -19,5 +19,5 @@ exports.HNSlackCommandHN = (req, res) => {
     });
 };
 
-{% include "../core/HNSlackCommandHN.js" %}
+{% include "../core/HNSlackCommandTopStories.js" %}
 {% include "../lib/HttpRequestUtils.js" %}

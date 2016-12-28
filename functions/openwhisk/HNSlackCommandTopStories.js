@@ -12,4 +12,4 @@ function main(params) {
     });
 }
 
-{% include "../core/HNSlackCommandHN.js" %}
+{% include "../core/HNSlackCommandTopStories.js" %}

@@ -4,10 +4,14 @@
 
 function main(params) {
     return new Promise((resolve, reject) => {
-		run(params, (err, response) => {
+        run(params, (err, response, action) => {
 			if (! err) {
+				var actionName;
+				if (action == 'top') {
+                    actionName = '/HNSlackCommandTopStories'
+				}
 				var whiskActionParams = {
-					actionName: params.openwhisk_namespace + '/HNSlackCommandHN',
+					actionName: params.openwhisk_namespace + actionName,
 					params: params,
 					blocking: false
 				};
