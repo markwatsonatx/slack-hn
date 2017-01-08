@@ -15,9 +15,14 @@ strindex() {
 }
 
 source ./aws_set_env_prod.sh
-action=$1
-func_name=$2
-func_file_name=$3
+func_name=$1
+func_file_name=$2
+func=$(aws lambda get-function --function-name $func_name 2> /dev/null)
+action='create-function'
+if [ -n "$func" ]
+    then
+        action='update-function-code'
+fi
 func_rel_file_name=$(echo $func_file_name | sed 's/.*\///')
 func_rel_file_name=$(echo $func_rel_file_name | sed 's/\.[^.]*$//')
 func_tmp_file_dir=$(echo $(dirname $(absPath ${BASH_SOURCE[0]}))'/release/prod/__'$func_rel_file_name'__')
